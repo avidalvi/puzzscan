@@ -1,0 +1,9 @@
+logs/
+output/
+scratch/
+data/*.db
+data/*.sqlite
+__pycache__/
+*.pyc
+.env
+.venv/
