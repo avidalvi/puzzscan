@@ -112,12 +112,12 @@ def _crop_with_alpha(
     mask: np.ndarray,
     contour_list: list[list[int]] | None = None,
 ) -> np.ndarray:
-    """Crop a piece from the source image, rotate it via PCA, and apply Alpha.
+    """Crop a piece from the source image in original orientation and apply Alpha.
 
     Args:
         img_bgr: Source image in BGR format (H, W, 3).
         mask: Binary mask (H, W) dtype uint8, values 0 or 255.
-        contour_list: Polygon contour to calculate PCA rotation.
+        contour_list: Polygon contour used to calculate the crop bounds.
 
     Returns:
         RGBA crop of the piece (h, w, 4) with transparent background.
@@ -128,41 +128,10 @@ def _crop_with_alpha(
     if not contour_list:
         return np.zeros((1, 1, 4), dtype=np.uint8)
 
-    # Calculate PCA rotation angle
-    pts = np.array(contour_list, dtype=np.float64)
-    mean, eigenvectors = cv2.PCACompute(pts, mean=None)  # type: ignore[call-overload]
-    angle = np.arctan2(eigenvectors[0, 1], eigenvectors[0, 0]) * 180 / np.pi
-    rot_angle = 90 - angle
-
-    # Bounding box with padding
+    # Tight crop in source orientation so extracted pieces match the debug image.
     x, y, w, h = cv2.boundingRect(np.array(contour_list, dtype=np.int32))
-    pad = max(w, h)
-    x1, y1 = max(0, x - pad), max(0, y - pad)
-    x2, y2 = min(img_bgr.shape[1], x + w + pad), min(img_bgr.shape[0], y + h + pad)
-
-    roi_img = img_bgr[y1:y2, x1:x2]
-    roi_mask = mask[y1:y2, x1:x2]
-
-    if roi_img.size == 0:
-        return np.zeros((1, 1, 4), dtype=np.uint8)
-
-    # Rotate ROI
-    center = (roi_img.shape[1] // 2, roi_img.shape[0] // 2)
-    M_rot = cv2.getRotationMatrix2D(center, rot_angle, 1.0)
-    rot_img = cv2.warpAffine(roi_img, M_rot, (roi_img.shape[1], roi_img.shape[0]))
-    rot_mask = cv2.warpAffine(roi_mask, M_rot, (roi_mask.shape[1], roi_mask.shape[0]))
-
-    # Tight crop the rotated piece
-    rot_contours, _ = cv2.findContours(
-        rot_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-    if not rot_contours:
-        return np.zeros((1, 1, 4), dtype=np.uint8)
-    best_rot_c = max(rot_contours, key=cv2.contourArea)
-    rx, ry, rw, rh = cv2.boundingRect(best_rot_c)
-
-    final_img = rot_img[ry : ry + rh, rx : rx + rw]
-    final_mask = rot_mask[ry : ry + rh, rx : rx + rw]
+    final_img = img_bgr[y : y + h, x : x + w]
+    final_mask = mask[y : y + h, x : x + w]
 
     if final_img.size == 0:
         return np.zeros((1, 1, 4), dtype=np.uint8)
