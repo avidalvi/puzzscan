@@ -3,12 +3,24 @@ name = "puzzscan"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.15"
 dependencies = [
     "loguru>=0.7.3",
-    "numpy>=2.4.5",
+    "matplotlib>=3.9.0",
+    "numpy>=1.26",
     "opencv-python>=4.13.0.92",
+    "Pillow>=10.0.0",
     "python-dotenv>=1.2.2",
+    "sam3",
+    "scikit-learn>=1.5.0",
+    "torch>=2.0.0",
+    "tqdm>=4.66.0",
+    "pycocotools>=2.0.8",
+    "einops>=0.8.2",
+    "triton-windows>=3.7.0.post26",
+    "psutil>=7.2.2",
+    "jupyter>=1.1.1",
+    "torchvision>=0.26.0",
 ]
 
 [dependency-groups]
@@ -16,6 +28,7 @@ dev = [
     "detect-secrets>=1.5.0",
     "mypy>=2.1.0",
     "pre-commit>=4.6.0",
+    "pytest>=8.0.0",
     "ruff>=0.15.13",
 ]
 
@@ -45,3 +58,16 @@ known-first-party = ["puzzscan", "utils"]
 python_version = "3.12"
 strict = true
 ignore_missing_imports = true
+
+[tool.uv.sources]
+sam3 = { url = "https://github.com/facebookresearch/sam3/archive/refs/heads/main.zip" }
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv]
+override-dependencies = ["numpy>=2.0.0"]
