@@ -1,30 +1,51 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+  - repo: local
     hooks:
       - id: trailing-whitespace
+        name: trailing-whitespace
+        entry: python -m scripts.local_precommit_checks trailing-whitespace
+        language: system
+        types_or: [text]
+
       - id: end-of-file-fixer
+        name: end-of-file-fixer
+        entry: python -m scripts.local_precommit_checks end-of-file-fixer
+        language: system
+        types_or: [text]
+
       - id: check-yaml
+        name: check-yaml
+        entry: python -m scripts.local_precommit_checks check-yaml
+        language: system
+        files: \.(yaml|yml)$
+
       - id: check-added-large-files
+        name: check-added-large-files
+        entry: python -m scripts.local_precommit_checks check-added-large-files
+        language: system
+        pass_filenames: true
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.8
-    hooks:
-      # Run the linter.
       - id: ruff
-        args: [ --fix ]
-      # Run the formatter.
+        name: ruff
+        entry: python -m ruff check --fix
+        language: system
+        types_or: [python, pyi]
+
       - id: ruff-format
+        name: ruff-format
+        entry: python -m ruff format
+        language: system
+        types_or: [python, pyi]
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
-    hooks:
       - id: mypy
-        additional_dependencies: [types-all]
+        name: mypy
+        entry: python -m mypy
+        language: system
+        types_or: [python, pyi]
 
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
       - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
+        name: detect-secrets
+        entry: python -m scripts.local_precommit_checks detect-secrets-baseline
+        language: system
+        pass_filenames: false
         exclude: .*/tests/.*|^\.secrets\.baseline$
