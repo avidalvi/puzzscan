@@ -138,6 +138,88 @@ ORIGEN = "piezas_1"
 Run both extraction pipelines before opening the notebook if you want the
 comparison cells to display results from both methods.
 
+## Piece Profile Generation
+
+Command:
+
+```powershell
+uv run python scripts/profile_pieces.py --puzzle ciudad --origen piezas_1
+```
+
+Optional filters:
+
+```powershell
+uv run python scripts/profile_pieces.py --puzzle ciudad
+uv run python scripts/profile_pieces.py
+```
+
+Inputs:
+
+```text
+data/puzzscan_v2.db, table sam3_piezas
+output/<puzzle>/piezas_sam3/<origen>/pieza_<n>.png
+```
+
+Main output:
+
+```text
+data/puzzscan_v2.db, table pieza_perfiles
+```
+
+Behavior:
+
+- Reads SAM 3 pieces from `sam3_piezas`.
+- Uses the PNG alpha channel as the source mask.
+- Extracts the outer contour and converts it to a continuous curve.
+- Smooths raster stair-steps and small pixel artefacts.
+- Detects four principal corners.
+- Splits the piece into faces in `1-2`, `2-3`, `3-4`, `4-1` order.
+- Normalizes each face as an open parametric curve from `(0, 0)` to `(1, 0)`.
+- Classifies faces as `lisa`, `macho`, `hembra`, or `desconocida`.
+- Reduces each face to 36 arc-length-spaced control points.
+- Stores profile geometry, descriptors, status, and quality flags.
+
+Important details:
+
+- The normalized face is not forced to be a function `Y=f(X)`. Puzzle tabs and
+  holes can legitimately move backwards in X.
+- The reduced descriptor uses 36 control points per face, stored as 72 floats
+  `(x, y)`.
+- Existing profiles for the same `pieza_id` and `profile_version` are replaced
+  before insertion.
+
+## Piece Profile Exploration Notebook
+
+Command:
+
+```powershell
+uv run python scripts/generate_piece_profile_notebook.py
+```
+
+Output:
+
+```text
+notebooks/piece_profile_exploration.ipynb
+```
+
+The notebook inspects the same five representative pieces through the full
+profile pipeline:
+
+- RGB, alpha, and pipeline mask.
+- Mask quality.
+- Raw contour vs smoothed puzzle contour.
+- Corner detection.
+- Face split.
+- Normalized parametric face curves.
+- Control-point descriptor reconstruction and RMSE.
+- Final profile summary.
+
+Representative pieces are selected deterministically by area quantiles, not at
+random, so the notebook shows small, medium, and large examples.
+
+When editing `src.piece_profile`, restart the notebook kernel before rerunning
+cells so Python does not reuse a cached module.
+
 ## Tests and Checks
 
 Run the normal test suite:
@@ -150,6 +232,12 @@ Run the SAM 3 extractor tests:
 
 ```powershell
 uv run pytest tests/test_sam3_extractor.py -q
+```
+
+Run the piece profile tests:
+
+```powershell
+uv run pytest tests/test_piece_profile.py tests/test_piece_profile_db.py -q
 ```
 
 Run Ruff on edited files:
@@ -201,3 +289,9 @@ Check:
 - `SAM3_TEXT_PROMPT` matches what should be detected.
 - `SAM3_CONFIDENCE_THRESHOLD` is not too high.
 - The source image has enough contrast and visible separation between pieces.
+
+### Notebook Import Uses an Old `src.piece_profile`
+
+If the profile notebook raises an import error for a function that exists on
+disk, restart the notebook kernel. Jupyter can keep an older imported module in
+memory after code changes.

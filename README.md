@@ -5,6 +5,8 @@ Puzzle-piece segmentation experiments using two pipelines:
 - **SAM 3 zero-shot extraction**: detects pieces from a text prompt and exports
   transparent PNG crops plus a numbered debug image.
 - **OpenCV extraction**: baseline classical image-processing pipeline.
+- **Geometric piece profiling**: converts SAM 3 piece crops into normalized
+  face curves, face classifications, and compact control-point descriptors.
 
 The project uses `uv` for dependency management.
 
@@ -78,7 +80,40 @@ This creates:
 notebooks/compare_segmentation.ipynb
 ```
 
+## Generate Piece Profiles
+
+After running SAM 3 extraction, generate geometric profiles from the extracted
+transparent PNGs:
+
+```powershell
+uv run python scripts/profile_pieces.py --puzzle ciudad --origen piezas_1
+```
+
+Omit filters to process all SAM 3 pieces in the database:
+
+```powershell
+uv run python scripts/profile_pieces.py
+```
+
+Profiles are stored in `data/puzzscan_v2.db`, table `pieza_perfiles`.
+
+To inspect the profile pipeline visually:
+
+```powershell
+uv run python scripts/generate_piece_profile_notebook.py
+```
+
+This creates:
+
+```text
+notebooks/piece_profile_exploration.ipynb
+```
+
 ## Documentation
 
-See [docs/scripts_manual.md](docs/scripts_manual.md) for a fuller manual of the
-available scripts, expected inputs, outputs, and common troubleshooting notes.
+See:
+
+- [docs/scripts_manual.md](docs/scripts_manual.md): command manual for scripts,
+  inputs, outputs, and troubleshooting.
+- [docs/procesado_piezas.md](docs/procesado_piezas.md): end-to-end description
+  of segmentation, profile extraction, normalized faces, and descriptors.
