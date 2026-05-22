@@ -21,7 +21,7 @@ load_dotenv()
 # T1: Constants (overridable via .env)
 # ---------------------------------------------------------------------------
 
-PROFILE_VERSION: str = "piece_profile_v1"
+PROFILE_VERSION: str = "piece_profile_v2"
 POINTS_PER_FACE: int = 128
 FOURIER_COEFFICIENTS: int = 16
 CONTROL_POINTS_PER_FACE: int = 36

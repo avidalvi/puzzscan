@@ -240,6 +240,42 @@ Run the piece profile tests:
 uv run pytest tests/test_piece_profile.py tests/test_piece_profile_db.py -q
 ```
 
+Run the piece search engine tests:
+
+```powershell
+uv run pytest tests/test_piece_search.py -q
+```
+
+## Piece Search Engine
+
+The search engine (`src/piece_search.py`) matches puzzle pieces by comparing
+their geometric face profiles. It ranks compatible candidates for each of the
+four cardinal directions (N, E, S, W) of a center piece.
+
+Generate the exploration notebook:
+
+```powershell
+uv run python scripts/generate_piece_search_notebook.py
+```
+
+Open the notebook:
+
+```powershell
+uv run jupyter notebook notebooks/piece_search_exploration.ipynb
+```
+
+### Key Design Decisions
+
+- **RMSE over DTW**: Point-to-point RMSE on the 36-point control descriptor is
+  the primary geometric score. DTW is available as a diagnostic only.
+- **Visual signals are complementary**: Luminance, colour (Lab), and texture
+  (gradient) profiles are weighted at 0.20/0.20/0.10 vs 1.00 for geometry.
+- **No persistence in first iteration**: Rankings exist only in memory.
+- **Unknown face types**: `desconocida` is allowed only when
+  `ALLOW_UNKNOWN_FACE = True`, with a penalty.
+- **Direction/face mapping**: The default mapping
+  (N→1-2, E→2-3, S→3-4, W→4-1) must be validated visually for each puzzle.
+
 Run Ruff on edited files:
 
 ```powershell

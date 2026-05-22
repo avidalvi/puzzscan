@@ -249,7 +249,7 @@ La tabla `pieza_perfiles` almacena:
 El perfil versionado actual es:
 
 ```text
-piece_profile_v1
+piece_profile_v2
 ```
 
 Antes de insertar un perfil se elimina el anterior para el mismo
@@ -308,6 +308,38 @@ partir de sus puntos de control.
 Sirve para comprobar si 36 puntos por cara son suficientes para representar la
 geometria.
 
+## Motor de Busqueda (Fase 3)
+
+El modulo `src/piece_search.py` implementa el motor de coincidencia de piezas:
+- Carga perfiles desde `pieza_perfiles` y los expone como `SearchPiece`.
+- Filtra candidatas por compatibilidad `macho`/`hembra`/`lisa`.
+- Compara curvas parametricas normalizadas con RMSE euclideo.
+- Ofrece DTW como diagnostico opcional (ventana Sakoe-Chiba 5%).
+- Calcula senales complementarias de luminancia/color/textura.
+- Genera ranking top-3 por direccion cardinal (N/E/S/W).
+- Incluye validacion cuantitativa (margen, decision `confident`/`ambiguous`).
+
+### Score combinado
+
+```
+score_total = 1.00 * geometry_rmse
+            + 0.20 * luminance_distance
+            + 0.20 * color_distance
+            + 0.10 * texture_distance
+            + penalizations
+```
+
+### RMSE vs DTW
+
+RMSE punto a punto es el score geometrico principal. DTW se calcula solo como
+diagnostico con `COMPUTE_DTW = True` y no participa en el ranking por defecto.
+
+### Senales visuales
+
+Luminancia, color (Lab) y textura (gradiente) son senales complementarias. Se
+extraen muestreando una banda de 8px hacia el interior de la pieza a lo largo
+de cada cara.
+
 ## Limitaciones Conocidas
 
 - Las esquinas siguen siendo el punto mas sensible del pipeline.
@@ -315,6 +347,7 @@ geometria.
 - La clasificacion `macho`/`hembra` es heuristica.
 - El descriptor de 36 puntos no resuelve aun el matching final entre piezas.
 - No existe todavia correccion manual interactiva de esquinas o perfiles.
+- El mapeo direccion/cara debe validarse visualmente para cada puzzle.
 
 ## Comandos Principales
 
@@ -328,6 +361,12 @@ uv run python scripts/profile_pieces.py --puzzle ciudad --origen piezas_1
 # Notebook de exploracion de perfiles
 uv run python scripts/generate_piece_profile_notebook.py
 
+# Notebook de busqueda de piezas
+uv run python scripts/generate_piece_search_notebook.py
+
 # Tests de perfil
 uv run pytest tests/test_piece_profile.py tests/test_piece_profile_db.py -q
+
+# Tests de busqueda
+uv run pytest tests/test_piece_search.py -q
 ```

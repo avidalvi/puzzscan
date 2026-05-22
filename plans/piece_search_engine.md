@@ -61,7 +61,7 @@ No modificar el significado de `pieza_perfiles`; esta fase lo consume.
 **Objetivo:** asegurar que hay perfiles suficientes para probar el motor.
 
 - [ ] **T0.1** Confirmar que existe `pieza_perfiles` con perfiles de
-  `piece_profile_v1`.
+  `piece_profile_v2`.
 - [ ] **T0.2** Definir pieza central por defecto en notebook:
 
   ```python
@@ -105,7 +105,7 @@ usar en matching.
   load_profiled_pieces(
       puzzle: str | None = None,
       origen: str | None = None,
-      profile_version: str = "piece_profile_v1",
+      profile_version: str = "piece_profile_v2",
       allow_needs_review: bool = True,
   ) -> list[SearchPiece]
   ```
@@ -463,7 +463,7 @@ luminancia, color y textura por candidata.
   PUZZLE = "ciudad"
   ORIGEN = None
   CENTER_PIEZA_ID = 836
-  PROFILE_VERSION = "piece_profile_v1"
+  PROFILE_VERSION = "piece_profile_v2"
   TOP_K = 3
   COMPUTE_DTW = False
   ALLOW_NEEDS_REVIEW = True

@@ -421,7 +421,7 @@ Controles minimos:
 PUZZLE = "ciudad"
 ORIGEN = None
 CENTER_PIEZA_ID = 836
-PROFILE_VERSION = "piece_profile_v1"
+PROFILE_VERSION = "piece_profile_v2"
 TOP_K = 3
 ALLOW_NEEDS_REVIEW = True
 ALLOW_UNKNOWN_FACE = True
